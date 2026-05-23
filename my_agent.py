@@ -7,10 +7,11 @@ from langchain_tavily import TavilySearch
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph.message import REMOVE_ALL_MESSAGES
 from typing_extensions import override
-from vector_store import get_agent_vector_store
+from vector_store import get_agent_vector_store, get_ollama_vector_store
 import tiktoken
 
 VECTORSTORE = get_agent_vector_store()
+test_vectorstore = get_ollama_vector_store()
 DEFAULT_K = 5
 THRESHOLD = 0.5
 
@@ -106,7 +107,8 @@ class FilteredToolMessageAfterModel(AgentMiddleware):
         
         return None
 
-def get_my_default_agent(model: ChatOpenAI ,tools: list, prompt: str):
+def get_my_default_agent(model: ChatOpenAI, tools: list, prompt: str):
+# def get_my_default_agent(model, tools: list, prompt: str):
     return create_agent(
         model,
         tools,
@@ -147,6 +149,7 @@ def search_chroma(query: str, region: str, month: int) -> str:
         search_filter = {"$and": conditions}
         
     print(f"search_filter: {search_filter}")
+    # result = test_vectorstore.similarity_search_with_relevance_scores(
     result = VECTORSTORE.similarity_search_with_relevance_scores(
         query,
         k=DEFAULT_K,

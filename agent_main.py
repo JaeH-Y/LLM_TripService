@@ -3,15 +3,11 @@ load_dotenv()
 
 import os
 from langchain_openai import ChatOpenAI
-from langchain_tavily import TavilySearch
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
+from langchain_ollama import ChatOllama
 from langchain_core.documents import Document
-import tiktoken
 import streamlit as st
 import datetime
-from graph_state import TripGraph
-from vector_store import get_vector_store
+from vector_store import get_agent_vector_store, get_ollama_vector_store
 import my_agent
 import uuid
 import json
@@ -22,6 +18,7 @@ os.getenv("TAVILY_API_KEY")
     
 # LLM 설정
 LLM = ChatOpenAI(model="gpt-4o-mini", temperature= 0.4)
+ollama = ChatOllama(model="qwen2.5:7b", temperature=0.4)
 
 # Agent 설정
 # Agent 프롬프트 작성
@@ -75,6 +72,11 @@ if "agent" not in st.session_state:
         [my_agent.search_chroma, my_agent.search_web], 
         agent_prompt
     )
+    # st.session_state.agent = my_agent.get_my_default_agent(
+    #     ollama, 
+    #     [my_agent.search_chroma, my_agent.search_web], 
+    #     agent_prompt
+    # )
 AGENT = st.session_state.agent
 
 # thread_id 설정
@@ -90,7 +92,8 @@ CONFIG = {
 }
 
 ## Chroma 설정
-VECTORSTORE = get_vector_store()
+VECTORSTORE = get_agent_vector_store()
+test_vectorstore = get_ollama_vector_store()
 
 def recommend_trip(query: str):
     pass
@@ -115,7 +118,9 @@ def save_message(response) -> str:
             metadata= base_condition
         ))
         VECTORSTORE.add_documents(docs)
+        # test_vectorstore.add_documents(docs)
         print("Chroma 저장 완료")
+        # print("Ollama_Chroma 저장 완료")
     
     return message
 
