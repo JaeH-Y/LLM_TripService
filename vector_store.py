@@ -9,3 +9,12 @@ def get_vector_store() -> Chroma:
         embedding_function=embedding,
         persist_directory="./chroma_trip"
     )
+    
+def get_agent_vector_store() -> Chroma:
+    embedding = OpenAIEmbeddings(model="text-embedding-3-small")
+
+    return Chroma(
+        collection_name="trip_reco_agent",
+        embedding_function=embedding,
+        persist_directory="./chroma_trip_agent"
+    )
