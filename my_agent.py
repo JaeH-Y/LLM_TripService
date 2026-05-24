@@ -137,9 +137,9 @@ def search_chroma(query: str, region: str, month: int) -> str:
     
     conditions = []
     if region:
-        conditions.append({"region": region})
+        conditions.append({"destination": region})
     if month:
-        conditions.append({"month": month})
+        conditions.append({"timing": month})
         
     if len(conditions) == 0:
         search_filter = None
@@ -155,14 +155,22 @@ def search_chroma(query: str, region: str, month: int) -> str:
         k=DEFAULT_K,
         filter=search_filter
     )
+    print(f"[DB 조회 결과]: {result}")
     return "\n".join(doc.page_content for doc, score in result if score >= THRESHOLD) if result else "DB에 정보 없음"
 
 @tool
 def search_web(query: str):
     """
     여행 관련 최신 정보를 웹에서 검색합니다.
+
+    [최종 JSON 답변 생성 전 반드시 확인]
+    - budget_warning: 사용자 예산이 플랜 합계보다 부족하면 "⚠️ 예산 안내: 입력 예산 OOO원, 최소 필요 OOO원" 형식으로 작성. 충분하면 null.
+    - special_notes: 영유아·노약자·장애인·임산부 등 특수 조건이 있으면 입장 제한 장소·유모차 접근성·수유실 등 주의사항 작성. 없으면 null.
+    - source: 이 도구를 사용했으면 반드시 "web"
+    위 세 필드가 누락되면 시스템 오류가 발생합니다.
     """
     result = TavilySearch(max_results=5).invoke(query)
+    # result = TavilySearch(max_results=5, include_raw_content=True).invoke(query)
     search_results = "\n\n".join([
         f"제목: {rs['title']}\nURL: {rs['url']}\n내용: {rs['raw_content'] or rs['content']}"
         for rs in result['results']
