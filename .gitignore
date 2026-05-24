@@ -131,9 +131,14 @@ celerybeat.pid
 .venv
 env/
 venv/
+trip_venv/
 ENV/
 env.bak/
 venv.bak/
+
+# ChromaDB
+chroma_trip_agent/
+chroma_trip_ollama/
 
 # Spyder project settings
 .spyderproject
