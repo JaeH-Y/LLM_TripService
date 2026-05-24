@@ -164,10 +164,11 @@ def search_web(query: str):
     여행 관련 최신 정보를 웹에서 검색합니다.
 
     [최종 JSON 답변 생성 전 반드시 확인]
-    - budget_warning: 사용자 예산이 플랜 합계보다 부족하면 "⚠️ 예산 안내: 입력 예산 OOO원, 최소 필요 OOO원" 형식으로 작성. 충분하면 null.
-    - special_notes: 영유아·노약자·장애인·임산부 등 특수 조건이 있으면 입장 제한 장소·유모차 접근성·수유실 등 주의사항 작성. 없으면 null.
+    - 예산 테이블: 해외 여행은 모든 행 비용을 반드시 '원화 (현지통화)' 형식으로 기입. 예: 922,500원 (90,000엔). 원화만 쓰는 것은 금지.
+    - budget_warning: 예산 테이블 합계를 먼저 계산한 뒤, 합계가 사용자 예산 초과 시에만 작성. 초과 아니면 null. budget_warning의 금액은 테이블 합계와 동일해야 함.
+    - special_notes: 영유아·노약자 등 특수 조건이 있으면 입장 제한 장소·유모차 접근성·수유실 등 주의사항 작성. 없으면 null.
     - source: 이 도구를 사용했으면 반드시 "web"
-    위 세 필드가 누락되면 시스템 오류가 발생합니다.
+    위 필드가 누락되면 시스템 오류가 발생합니다.
     """
     result = TavilySearch(max_results=5).invoke(query)
     # result = TavilySearch(max_results=5, include_raw_content=True).invoke(query)
@@ -176,6 +177,15 @@ def search_web(query: str):
         for rs in result['results']
     ])
     enc = tiktoken.encoding_for_model("gpt-4o-mini")
-    print(f"예상 소요 토큰: {len(enc.encode(search_results))}")
+    token = len(enc.encode(search_results))
+    # if raw_token > 100000:
+    #     result = TavilySearch(max_results=5).invoke(query)
+    #     search_results = "\n\n".join([
+    #         f"제목: {rs['title']}\nURL: {rs['url']}\n내용: {rs['raw_content'] or rs['content']}"
+    #         for rs in result['results']
+    #     ])
+    # token = len(enc.encode(search_results))
+    
+    print(f"예상 소요 토큰: {token}")
     
     return search_results
